@@ -1,0 +1,25 @@
+{
+  "name": "mockapi",
+  "version": "1.0.0",
+  "description": "SILK Mock Server for developer testing",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bismay4u/mockserver.git"
+  },
+  "keywords": [
+    "mock",
+    "server",
+    "mockapi",
+    "api"
+  ],
+  "author": "bismay",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bismay4u/mockserver/issues"
+  },
+  "homepage": "https://github.com/bismay4u/mockserver#readme"
+}
