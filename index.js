@@ -56,24 +56,14 @@ server.pre(restify.plugins.pre.sanitizePath());
 */
 server.use(restify.plugins.urlEncodedBodyParser());
 server.use(restify.plugins.queryParser({ mapParams: true }));//req.query
-server.use(restify.plugins.acceptParser(server.acceptable));
+server.use(restify.plugins.acceptParser( server.acceptable ));
 server.use(restify.plugins.dateParser());
 server.use(restify.plugins.fullResponse());
 server.use(restify.plugins.gzipResponse());
-server.use(restify.plugins.throttle({
-                burst: 10,  // Max 10 concurrent requests (if tokens)
-                rate: 0.5,  // Steady state: 1 request / 2 seconds
-                ip: true,   // throttle per IP
-                overrides: {
-                    'localhost': {
-                        burst: 0,
-                        rate: 0    // unlimited
-                    }
-                }
-            }));
+server.use(restify.plugins.throttle( config.throttle ));
 
 server.get('/', (req, res) => {
-    res.send('Hello World!')
+    res.send('Welcome to '+server.config.name)
 })
 
 server.get('/*', (req, res, next) => {
@@ -99,13 +89,16 @@ function printMockData(type, path, req, res, next) {
     var output = {};
     var format = "json";
     var outFormat = "json";
-    var srcFile = [
-            path+"."+format
-        ];
+    var srcFile = [];
+
+    if(server.config.strict_request_type===false) {
+        srcFile.push(path+"."+format);
+    }
 
     switch(type.toUpperCase()) {
         case "GET":
             srcFile.push(path+"_get."+format);
+            srcFile.push(path+"_get.js");
         break;
         case "POST":
             srcFile.push(path+"_post."+format);
@@ -113,12 +106,15 @@ function printMockData(type, path, req, res, next) {
         break;
         case "PUT":
             srcFile.push(path+"_put."+format);
+            srcFile.push(path+"_put.js");
         break;
         case "DELETE":
             srcFile.push(path+"_delete."+format);
+            srcFile.push(path+"_delete.js");
         break;
         case "OPTIONS":
             srcFile.push(path+"_options."+format);
+            srcFile.push(path+"_options.js");
         break;
     }
     srcFile = srcFile.reverse();
@@ -138,7 +134,13 @@ function printMockData(type, path, req, res, next) {
                 break;
                 case "js":
                    try {
-                        output = require(f1)(server, req, res);
+                        output = require(f1)({//server, req, res
+                            "body": req.body,
+                            "query": req.query,
+                            "params": req.params,
+                            "headers": req.headers,
+                            "path": req.path(),
+                        });
                    } catch(e) {
                         output = require(f1);
                    }
@@ -146,18 +148,23 @@ function printMockData(type, path, req, res, next) {
             }
         }
     });
-
-    if(req.query.debug=="true") {
-        // output = _.merge(output,{
-        //     "type":type.toUpperCase(),
-        //     "path": path,
-        //     "src": srcFile
-        // });
-        output = {
-            "type":type.toUpperCase(),
-            "path": path,
-            "src": srcFile,
-            "data":output
+    
+    if(req.query.debug != null && req.query.debug=="true") {
+        if(server.config.debug_mode == "embeded") {
+            output1 = _.merge({}, output);
+            output1 = _.merge(output1,{
+                "type":type.toUpperCase(),
+                "path": path,
+                "src": srcFile
+            });
+            output = output1;
+        } else {
+            output = {
+                "type":type.toUpperCase(),
+                "path": path,
+                "src": srcFile,
+                "data":output
+            }
         }
     }
 
