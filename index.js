@@ -88,7 +88,6 @@ server.put('/*', (req, res, next) => {
 
 /**
  * Start Server, Checks for availale PORTs
- * Then Connect to Mongo, MySQL, Redis
  */
 server.listen(config.port, () => {
     console.log(`${server.config.name} is listening on port ${config.port}`);
