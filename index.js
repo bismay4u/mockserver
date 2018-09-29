@@ -18,6 +18,8 @@ const fs = require('fs');
 const bunyan = require('bunyan');
 const _ = require('lodash');
 
+//Need require-live
+
 /**
  * Create A Logger, may be we will remove this in future
  */
@@ -135,7 +137,11 @@ function printMockData(type, path, req, res, next) {
                     output = JSON.parse(output);
                 break;
                 case "js":
-                   output = require(f1);
+                   try {
+                        output = require(f1)(server, req, res);
+                   } catch(e) {
+                        output = require(f1);
+                   }
                 break;
             }
         }
