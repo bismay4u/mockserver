@@ -63,7 +63,7 @@ server.use(restify.plugins.gzipResponse());
 server.use(restify.plugins.throttle( config.throttle ));
 
 server.get('/', (req, res) => {
-    res.send('Welcome to '+server.config.name)
+    res.send('Welcome to '+server.config.name);
 })
 
 server.get('/*', (req, res, next) => {
