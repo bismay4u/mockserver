@@ -6,7 +6,7 @@ module.exports = {
 	packageid: packageConfig.name,
 	env: process.env.NODE_ENV || 'development',
 	port: process.env.PORT || 9000,
-	data_folder: "./mockdata/",
+	data_folder: "/mockdata",
 	base_url: process.env.BASE_URL || 'http://localhost:9000',
 	cache : {
 		host: '127.0.0.1',   // Redis host
@@ -25,6 +25,9 @@ module.exports = {
 				rate: 0    // unlimited
 			}
 		}
+	},
+	error : {
+		404: {error: 'Mock Source Not Found'}
 	},
 	strict_request_type: false,
 	debug_mode: "general",

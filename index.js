@@ -133,11 +133,15 @@ function printMockData(type, path, req, res, next) {
     srcFile = srcFile.reverse();
 
     var found = false;
+    var finalLoadedFile = false;
     _.each(srcFile, (f,n) => {
         if(found) return;
-        f1 = process.cwd() + "/mockData" + f;
+        f1 = process.cwd() + server.config.data_folder + f;
+        
         if(fs.existsSync(f1)) {
             found = true;
+            finalLoadedFile = f1;
+          
             ext = f1.split(".");
             ext = ext[ext.length-1];
             switch(ext.toLowerCase()) {
@@ -162,13 +166,19 @@ function printMockData(type, path, req, res, next) {
         }
     });
     
+    if(found===false) {
+      res.send(404, server.config.error[404]);
+      return next();
+    }
+    
     if(req.query.debug != null && req.query.debug=="true") {
         if(server.config.debug_mode == "embeded") {
             output1 = _.merge({}, output);
             output1 = _.merge(output1,{
                 "type":type.toUpperCase(),
                 "path": path,
-                "src": srcFile
+                "src": srcFile,
+                "file":finalLoadedFile
             });
             output = output1;
         } else {
@@ -176,7 +186,8 @@ function printMockData(type, path, req, res, next) {
                 "type":type.toUpperCase(),
                 "path": path,
                 "src": srcFile,
-                "data":output
+                "data":output,
+                "file":finalLoadedFile
             }
         }
     }
