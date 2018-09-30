@@ -27,7 +27,7 @@ module.exports = {
 		}
 	},
 	error : {
-		404: {error: 'Mock Source Not Found'}
+		404: {error: 'Mock Source Not Found', code: 404}
 	},
 	strict_request_type: false,
 	debug_mode: "general",
