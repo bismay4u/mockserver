@@ -18,8 +18,6 @@ const fs = require('fs');
 const bunyan = require('bunyan');
 const _ = require('lodash');
 
-//Need require-live
-
 /**
  * Create A Logger, may be we will remove this in future
  */
@@ -62,8 +60,10 @@ server.use(restify.plugins.fullResponse());
 server.use(restify.plugins.gzipResponse());
 server.use(restify.plugins.throttle( config.throttle ));
 
-server.get('/', (req, res) => {
-    res.send('Welcome to '+server.config.name);
+server.get('/', (req, res, next) => {
+    res.header('content-type', "text/plain");
+    res.sendRaw('Welcome to '+server.config.name);
+    return next();
 })
 
 server.get('/*', (req, res, next) => {
@@ -76,6 +76,23 @@ server.post('/*', (req, res, next) => {
 
 server.put('/*', (req, res, next) => {
     printMockData("PUT",req.path(),req, res, next);
+});
+
+server.del('/*', (req, res, next) => {
+    printMockData("DELETE",req.path(),req, res, next);
+});
+
+server.opts('/*', (req, res, next) => {
+    res.header('allow', server.config.request_options);
+    res.charSet('utf-8');
+    res.header('content-type', "text/plain");
+    res.sendRaw(server.config.request_options);
+    return next();
+});
+
+server.head('/*', (req, res, next) => {
+    res.send("OK");
+    return next();
 });
 
 /**
@@ -111,10 +128,6 @@ function printMockData(type, path, req, res, next) {
         case "DELETE":
             srcFile.push(path+"_delete."+format);
             srcFile.push(path+"_delete.js");
-        break;
-        case "OPTIONS":
-            srcFile.push(path+"_options."+format);
-            srcFile.push(path+"_options.js");
         break;
     }
     srcFile = srcFile.reverse();
